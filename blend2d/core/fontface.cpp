@@ -78,33 +78,6 @@ static BLResult BL_CDECL bl_null_font_face_get_glyph_outlines(
   return bl_make_error(BL_ERROR_FONT_NOT_INITIALIZED);
 }
 
-static BLResult BL_CDECL bl_null_font_face_apply_kern(
-  const BLFontFaceImpl* face_impl,
-  uint32_t* glyph_data,
-  BLGlyphPlacement* placement_data,
-  size_t count) noexcept {
-
-  return bl_make_error(BL_ERROR_FONT_NOT_INITIALIZED);
-}
-
-static BLResult BL_CDECL bl_null_font_face_apply_gsub(
-  const BLFontFaceImpl* impl,
-  BLGlyphBuffer* gb,
-  const uint32_t* bit_words,
-  size_t bit_word_count) noexcept {
-
-  return bl_make_error(BL_ERROR_FONT_NOT_INITIALIZED);
-}
-
-static BLResult BL_CDECL bl_null_font_face_apply_gpos(
-  const BLFontFaceImpl* impl,
-  BLGlyphBuffer* gb,
-  const uint32_t* bit_words,
-  size_t bit_word_count) noexcept {
-
-  return bl_make_error(BL_ERROR_FONT_NOT_INITIALIZED);
-}
-
 static BLResult BL_CDECL bl_null_font_face_position_glyphs(
   const BLFontFaceImpl* impl,
   uint32_t* glyph_data,
@@ -312,48 +285,12 @@ BLResult bl_font_face_get_character_coverage(const BLFontFaceCore* self, BLBitSe
   return bl_bit_set_assign_weak(out, &self_impl->character_coverage);
 }
 
-bool bl_font_face_has_script_tag(const BLFontFaceCore* self, BLTag script_tag) noexcept {
-  using namespace bl::FontFaceInternal;
-  BL_ASSERT(self->_d.is_font_face());
-
-  const BLFontFacePrivateImpl* self_impl = get_impl(self);
-  return self_impl->script_tag_set.has_tag(script_tag);
-}
-
-bool bl_font_face_has_feature_tag(const BLFontFaceCore* self, BLTag feature_tag) noexcept {
-  using namespace bl::FontFaceInternal;
-  BL_ASSERT(self->_d.is_font_face());
-
-  const BLFontFacePrivateImpl* self_impl = get_impl(self);
-  return self_impl->feature_tag_set.has_tag(feature_tag);
-}
-
 bool bl_font_face_has_variation_tag(const BLFontFaceCore* self, BLTag variation_tag) noexcept {
   using namespace bl::FontFaceInternal;
   BL_ASSERT(self->_d.is_font_face());
 
   const BLFontFacePrivateImpl* self_impl = get_impl(self);
   return self_impl->variation_tag_set.has_tag(variation_tag);
-}
-
-BLResult bl_font_face_get_script_tags(const BLFontFaceCore* self, BLArrayCore* out) noexcept {
-  using namespace bl::FontFaceInternal;
-
-  BL_ASSERT(self->_d.is_font_face());
-  BL_ASSERT(out->_d.is_array());
-
-  const BLFontFacePrivateImpl* self_impl = get_impl(self);
-  return self_impl->script_tag_set.flatten_to(out->dcast<BLArray<BLTag>>());
-}
-
-BLResult bl_font_face_get_feature_tags(const BLFontFaceCore* self, BLArrayCore* out) noexcept {
-  using namespace bl::FontFaceInternal;
-
-  BL_ASSERT(self->_d.is_font_face());
-  BL_ASSERT(out->_d.is_array());
-
-  const BLFontFacePrivateImpl* self_impl = get_impl(self);
-  return self_impl->feature_tag_set.flatten_to(out->dcast<BLArray<BLTag>>());
 }
 
 BLResult bl_font_face_get_variation_tags(const BLFontFaceCore* self, BLArrayCore* out) noexcept {
@@ -377,9 +314,6 @@ void bl_font_face_rt_init(BLRuntimeContext* rt) noexcept {
   bl_null_font_face_funcs.get_glyph_bounds = bl_null_font_face_get_glyph_bounds;
   bl_null_font_face_funcs.get_glyph_advances = bl_null_font_face_get_glyph_advances;
   bl_null_font_face_funcs.get_glyph_outlines = bl_null_font_face_get_glyph_outlines;
-  bl_null_font_face_funcs.apply_kern = bl_null_font_face_apply_kern;
-  bl_null_font_face_funcs.apply_gsub = bl_null_font_face_apply_gsub;
-  bl_null_font_face_funcs.apply_gpos = bl_null_font_face_apply_gpos;
   bl_null_font_face_funcs.position_glyphs = bl_null_font_face_position_glyphs;
 
   bl_font_face_default_impl.virt.base.destroy = bl_null_font_face_impl_destroy;

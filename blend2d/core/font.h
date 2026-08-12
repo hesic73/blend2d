@@ -86,9 +86,6 @@ BL_API BLResult BL_CDECL bl_font_reset_variation_settings(BLFontCore* self) BL_N
 BL_API BLResult BL_CDECL bl_font_shape(const BLFontCore* self, BLGlyphBufferCore* gb) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_map_text_to_glyphs(const BLFontCore* self, BLGlyphBufferCore* gb, BLGlyphMappingState* state_out) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_position_glyphs(const BLFontCore* self, BLGlyphBufferCore* gb) BL_NOEXCEPT_C;
-BL_API BLResult BL_CDECL bl_font_apply_kerning(const BLFontCore* self, BLGlyphBufferCore* gb) BL_NOEXCEPT_C;
-BL_API BLResult BL_CDECL bl_font_apply_gsub(const BLFontCore* self, BLGlyphBufferCore* gb, const BLBitArrayCore* lookups) BL_NOEXCEPT_C;
-BL_API BLResult BL_CDECL bl_font_apply_gpos(const BLFontCore* self, BLGlyphBufferCore* gb, const BLBitArrayCore* lookups) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_get_text_metrics(const BLFontCore* self, BLGlyphBufferCore* gb, BLTextMetrics* out) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_get_glyph_bounds(const BLFontCore* self, const uint32_t* glyph_data, intptr_t glyph_advance, BLBoxI* out, size_t count) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_get_glyph_advances(const BLFontCore* self, const uint32_t* glyph_data, intptr_t glyph_advance, BLGlyphPlacement* out, size_t count) BL_NOEXCEPT_C;
@@ -322,6 +319,8 @@ public:
   //! \name Glyphs & Text
   //! \{
 
+  //! Always fails with \ref BL_ERROR_NOT_IMPLEMENTED: this build has no OpenType layout engine, so it cannot
+  //! turn text into positioned glyphs. Shape elsewhere and render the result as a \ref BLGlyphRun.
   BL_INLINE_NODEBUG BLResult shape(BLGlyphBufferCore& gb) const noexcept {
     return bl_font_shape(this, &gb);
   }
@@ -336,18 +335,6 @@ public:
 
   BL_INLINE_NODEBUG BLResult position_glyphs(BLGlyphBufferCore& gb) const noexcept {
     return bl_font_position_glyphs(this, &gb);
-  }
-
-  BL_INLINE_NODEBUG BLResult apply_kerning(BLGlyphBufferCore& gb) const noexcept {
-    return bl_font_apply_kerning(this, &gb);
-  }
-
-  BL_INLINE_NODEBUG BLResult apply_gsub(BLGlyphBufferCore& gb, const BLBitArrayCore& lookups) const noexcept {
-    return bl_font_apply_gsub(this, &gb, &lookups);
-  }
-
-  BL_INLINE_NODEBUG BLResult apply_gpos(BLGlyphBufferCore& gb, const BLBitArrayCore& lookups) const noexcept {
-    return bl_font_apply_gpos(this, &gb, &lookups);
   }
 
   BL_INLINE_NODEBUG BLResult get_text_metrics(BLGlyphBufferCore& gb, BLTextMetrics& out) const noexcept {

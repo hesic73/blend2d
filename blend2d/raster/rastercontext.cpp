@@ -2573,61 +2573,6 @@ static BL_INLINE BLResult enqueue_fill_or_stroke_glyph_run(
     });
 }
 
-template<uint32_t OpType>
-static BL_INLINE BLResult enqueue_fill_or_stroke_text(
-    BLRasterContextImpl* ctx_impl, DispatchInfo di, DispatchStyle ds,
-    const BLPoint* origin, const BLFontCore* font, const void* text, size_t size, BLTextEncoding encoding) noexcept {
-
-  if (size == SIZE_MAX)
-    size = StringOps::length_with_encoding(text, encoding);
-
-  if (!size)
-    return BL_SUCCESS;
-
-  BLResult result = BL_SUCCESS;
-  Wrap<BLGlyphBuffer> gb;
-
-  void* serialized_text_data = nullptr;
-  size_t serialized_text_size = size << text_byte_size_shift_by_encoding[encoding];
-
-  if (serialized_text_size > BL_RASTER_CONTEXT_MAXIMUM_EMBEDDED_TEXT_SIZE) {
-    gb.init();
-    result = gb->set_text(text, size, encoding);
-  }
-  else {
-    serialized_text_data = ctx_impl->worker_mgr->_allocator.alloc(IntOps::align_up(serialized_text_size, 8));
-    if (!serialized_text_data)
-      result = BL_ERROR_OUT_OF_MEMORY;
-    else
-      memcpy(serialized_text_data, text, serialized_text_size);
-  }
-
-  if (result == BL_SUCCESS) {
-    BLPoint origin_fixed = ctx_impl->final_transform_fixed().map_point(*origin);
-    di.add_fill_type(Pipeline::FillType::kAnalytic);
-
-    RenderCommand* command = ctx_impl->worker_mgr->current_command();
-    command->init_command(di.alpha);
-    command->init_fill_analytic(nullptr, 0, BL_FILL_RULE_NON_ZERO);
-
-    result = enqueue_command_with_fill_or_stroke_job<OpType, RenderJob_TextOp>(
-      ctx_impl, di, ds,
-      IntOps::align_up(sizeof(RenderJob_TextOp), WorkerManager::kAllocatorAlignment), origin_fixed,
-      [&](RenderJob_TextOp* job) {
-        job->init_font(*font);
-        if (serialized_text_size > BL_RASTER_CONTEXT_MAXIMUM_EMBEDDED_TEXT_SIZE)
-          job->init_glyph_buffer(gb->impl);
-        else
-          job->init_text_data(serialized_text_data, size, encoding);
-      });
-  }
-
-  if (result != BL_SUCCESS && serialized_text_size > BL_RASTER_CONTEXT_MAXIMUM_EMBEDDED_TEXT_SIZE)
-    gb.destroy();
-
-  return result;
-}
-
 // bl::RasterEngine - ContextImpl - Internals - Fill Clipped Box
 // =============================================================
 
@@ -3111,13 +3056,10 @@ BL_NOINLINE BLResult fill_unclipped_text<kSync>(BLRasterContextImpl* ctx_impl, D
 template<>
 BL_NOINLINE BLResult fill_unclipped_text<kAsync>(BLRasterContextImpl* ctx_impl, DispatchInfo di, DispatchStyle ds, const BLPoint* origin, const BLFontCore* font, BLContextRenderTextOp op_type, const void* data) noexcept {
   if (op_type <= BLContextRenderTextOp(BL_TEXT_ENCODING_MAX_VALUE)) {
-    const BLDataView* view = static_cast<const BLDataView*>(data);
-    BLTextEncoding encoding = static_cast<BLTextEncoding>(op_type);
-
-    if (view->size == 0)
-      return BL_SUCCESS;
-
-    return enqueue_fill_or_stroke_text<BL_CONTEXT_STYLE_SLOT_FILL>(ctx_impl, di, ds, origin, font, view->data, view->size, encoding);
+    // A worker cannot report an error, so a text operation that needs shaping has to be refused here rather than
+    // enqueued and abandoned. bl_font_shape() is what the synchronous path fails on; this fails the same way.
+    bl_unused(origin, font, data);
+    return bl_make_error(BL_ERROR_NOT_IMPLEMENTED);
   }
   else if (op_type == BL_CONTEXT_RENDER_TEXT_OP_GLYPH_RUN) {
     const BLGlyphRun* glyph_run = static_cast<const BLGlyphRun*>(data);
@@ -3293,13 +3235,10 @@ BL_NOINLINE BLResult stroke_unclipped_text<kSync>(BLRasterContextImpl* ctx_impl,
 template<>
 BL_NOINLINE BLResult stroke_unclipped_text<kAsync>(BLRasterContextImpl* ctx_impl, DispatchInfo di, DispatchStyle ds, const BLPoint* origin, const BLFontCore* font, BLContextRenderTextOp op_type, const void* data) noexcept {
   if (op_type <= BLContextRenderTextOp(BL_TEXT_ENCODING_MAX_VALUE)) {
-    const BLDataView* view = static_cast<const BLDataView*>(data);
-    BLTextEncoding encoding = static_cast<BLTextEncoding>(op_type);
-
-    if (view->size == 0)
-      return BL_SUCCESS;
-
-    return enqueue_fill_or_stroke_text<BL_CONTEXT_STYLE_SLOT_STROKE>(ctx_impl, di, ds, origin, font, view->data, view->size, encoding);
+    // A worker cannot report an error, so a text operation that needs shaping has to be refused here rather than
+    // enqueued and abandoned. bl_font_shape() is what the synchronous path fails on; this fails the same way.
+    bl_unused(origin, font, data);
+    return bl_make_error(BL_ERROR_NOT_IMPLEMENTED);
   }
   else if (op_type == BL_CONTEXT_RENDER_TEXT_OP_GLYPH_RUN) {
     const BLGlyphRun* glyph_run = static_cast<const BLGlyphRun*>(data);

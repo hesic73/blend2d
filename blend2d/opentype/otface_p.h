@@ -11,8 +11,6 @@
 #include <blend2d/opentype/otcmap_p.h>
 #include <blend2d/opentype/otdefs_p.h>
 #include <blend2d/opentype/otglyf_p.h>
-#include <blend2d/opentype/otkern_p.h>
-#include <blend2d/opentype/otlayout_p.h>
 #include <blend2d/opentype/otmetrics_p.h>
 #include <blend2d/opentype/otname_p.h>
 
@@ -29,39 +27,7 @@ enum class OTFaceFlags : uint32_t {
   //! Glyph offsets in 'loca' table use 16-bit offsets [must be 0x2].
   kLocaOffset16        = 0x00000002u,
   //! Glyph offsets in 'loca' table use 32-bit offsets [must be 0x4].
-  kLocaOffset32        = 0x00000004u,
-
-  // Flags related to 'kern' table
-  // -----------------------------
-
-  kLegacyKernAvailable = 0x00000010u,
-
-  // Flags related to 'GDEF' table
-  // -----------------------------
-
-  kGlyphClassDef       = 0x00000100u,
-  kAttachList          = 0x00000200u,
-  kLitCaretList        = 0x00000400u,
-  kMarkAttachClassDef  = 0x00000800u,
-  kMarkGlyphSetsDef    = 0x00001000u,
-  kItemVarStore        = 0x00002000u,
-
-  // Flags related to 'GSUB' table
-  // -----------------------------
-
-  kGSubScriptList      = 0x00010000u,
-  kGSubFeatureList     = 0x00020000u,
-  kGSubLookupList      = 0x00040000u,
-  kGSubFVar            = 0x00080000u,
-
-  // Flags related to 'GPOS' table
-  // -----------------------------
-
-  kGPosScriptList      = 0x00100000u,
-  kGPosFeatureList     = 0x00200000u,
-  kGPosLookupList      = 0x00400000u,
-  kGPosFVar            = 0x00800000u,
-  kGPosKernAvailable   = 0x01000000u
+  kLocaOffset32        = 0x00000004u
 };
 
 BL_DEFINE_ENUM_FLAGS(OTFaceFlags)
@@ -86,11 +52,6 @@ struct OTFaceImpl : public BLFontFacePrivateImpl {
   //! Metrics data.
   MetricsData metrics;
 
-  //! Legacy kerning data - 'kern' table and related data.
-  KernData kern;
-  //! OpenType layout data - 'GDEF', 'GSUB', and 'GPOS' tables.
-  LayoutData layout;
-
   union {
     //! OpenType font data [Compact Font Format] [CFF or CFF2].
     CFFData cff;
@@ -107,7 +68,7 @@ struct OTFaceImpl : public BLFontFacePrivateImpl {
 
 //! OpenType tables that are used during the initialization of \ref OTFaceImpl.
 union OTFaceTables {
-  enum : uint32_t { kTableCount = 19 };
+  enum : uint32_t { kTableCount = 14 };
 
   BLFontTable tables[kTableCount];
 
@@ -123,13 +84,6 @@ union OTFaceTables {
     BLFontTable hmtx;
     BLFontTable vhea;
     BLFontTable vmtx;
-
-    BLFontTable kern;
-
-    BLFontTable base;
-    BLFontTable gdef;
-    BLFontTable gpos;
-    BLFontTable gsub;
 
     BLFontTable glyf;
     BLFontTable loca;
@@ -151,13 +105,6 @@ union OTFaceTables {
       BL_MAKE_TAG('h', 'm', 't', 'x'),
       BL_MAKE_TAG('v', 'h', 'e', 'a'),
       BL_MAKE_TAG('v', 'm', 't', 'x'),
-
-      BL_MAKE_TAG('k', 'e', 'r', 'n'),
-
-      BL_MAKE_TAG('B', 'A', 'S', 'E'),
-      BL_MAKE_TAG('G', 'D', 'E', 'F'),
-      BL_MAKE_TAG('G', 'P', 'O', 'S'),
-      BL_MAKE_TAG('G', 'S', 'U', 'B'),
 
       BL_MAKE_TAG('g', 'l', 'y', 'f'),
       BL_MAKE_TAG('l', 'o', 'c', 'a'),

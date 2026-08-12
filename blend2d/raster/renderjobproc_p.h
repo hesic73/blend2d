@@ -146,39 +146,17 @@ static void process_fill_geometry_job(WorkData* work_data, RenderJob_GeometryOp*
 // ================================================
 
 static void process_fill_text_job(WorkData* work_data, RenderJob_TextOp* job) noexcept {
-  BLResult result = BL_SUCCESS;
-  uint32_t data_type = job->text_data_type();
+  // Shaping is refused before a text operation is ever enqueued, so a job can only carry a glyph run.
+  BL_ASSERT(job->text_data_type() == RenderJob::kTextDataGlyphRun);
 
   const BLFont& font = job->_font.dcast();
   const BLPoint& origin_fixed = job->origin_fixed();
-  const BLGlyphRun* glyph_run = nullptr;
 
-  if (data_type != RenderJob::kTextDataGlyphRun) {
-    BLGlyphBuffer* glyph_buffer;
+  JobStateAccessor accessor(job);
+  prepare_edge_builder(work_data, accessor.fill_state());
 
-    if (data_type != RenderJob::kTextDataGlyphBuffer) {
-      glyph_buffer = &work_data->glyph_buffer;
-      glyph_buffer->set_text(job->text_data(), job->text_size(), (BLTextEncoding)data_type);
-    }
-    else {
-      glyph_buffer = &job->_glyph_buffer.dcast();
-    }
-
-    result = font.shape(*glyph_buffer);
-    glyph_run = &glyph_buffer->glyph_run();
-  }
-  else {
-    glyph_run = &job->_glyph_run;
-  }
-
-  if (result == BL_SUCCESS) {
-    JobStateAccessor accessor(job);
-    prepare_edge_builder(work_data, accessor.fill_state());
-
-    result = add_filled_glyph_run_edges(work_data, accessor, origin_fixed, &font, glyph_run);
-    if (result == BL_SUCCESS) {
-      assign_edges(work_data, job, &work_data->edge_storage);
-    }
+  if (add_filled_glyph_run_edges(work_data, accessor, origin_fixed, &font, &job->_glyph_run) == BL_SUCCESS) {
+    assign_edges(work_data, job, &work_data->edge_storage);
   }
 
   job->destroy();
@@ -206,39 +184,17 @@ static void process_stroke_geometry_job(WorkData* work_data, RenderJob_GeometryO
 // ==================================================
 
 static void process_stroke_text_job(WorkData* work_data, RenderJob_TextOp* job) noexcept {
-  BLResult result = BL_SUCCESS;
-  uint32_t data_type = job->text_data_type();
+  // Shaping is refused before a text operation is ever enqueued, so a job can only carry a glyph run.
+  BL_ASSERT(job->text_data_type() == RenderJob::kTextDataGlyphRun);
 
   const BLFont& font = job->_font.dcast();
   const BLPoint& origin_fixed = job->origin_fixed();
-  const BLGlyphRun* glyph_run = nullptr;
 
-  if (data_type != RenderJob::kTextDataGlyphRun) {
-    BLGlyphBuffer* glyph_buffer;
+  JobStateAccessor accessor(job);
+  prepare_edge_builder(work_data, accessor.fill_state());
 
-    if (data_type != RenderJob::kTextDataGlyphBuffer) {
-      glyph_buffer = &work_data->glyph_buffer;
-      glyph_buffer->set_text(job->text_data(), job->text_size(), (BLTextEncoding)data_type);
-    }
-    else {
-      glyph_buffer = &job->_glyph_buffer.dcast();
-    }
-
-    result = font.shape(*glyph_buffer);
-    glyph_run = &glyph_buffer->glyph_run();
-  }
-  else {
-    glyph_run = &job->_glyph_run;
-  }
-
-  if (result == BL_SUCCESS) {
-    JobStateAccessor accessor(job);
-    prepare_edge_builder(work_data, accessor.fill_state());
-
-    result = add_stroked_glyph_run_edges(work_data, accessor, origin_fixed, &font, glyph_run);
-    if (result == BL_SUCCESS) {
-      assign_edges(work_data, job, &work_data->edge_storage);
-    }
+  if (add_stroked_glyph_run_edges(work_data, accessor, origin_fixed, &font, &job->_glyph_run) == BL_SUCCESS) {
+    assign_edges(work_data, job, &work_data->edge_storage);
   }
 
   job->destroy();

@@ -37,8 +37,6 @@ BL_DEFINE_ENUM(BLFontFaceFlags) {
   BL_FONT_FACE_FLAG_HORIZONTAL_METRICS = 0x00000010u,
   //! Vertical glyph metrics (advances, side bearings) is available.
   BL_FONT_FACE_FLAG_VERTICAL_METRICS = 0x00000020u,
-  //! Legacy horizontal kerning feature ('kern' table with horizontal kerning data).
-  BL_FONT_FACE_FLAG_HORIZONTAL_KERNING = 0x00000040u,
   //! Legacy vertical kerning feature ('kern' table with vertical kerning data).
   BL_FONT_FACE_FLAG_VERTICAL_KERNING = 0x00000080u,
   //! OpenType features (GDEF, GPOS, GSUB) are available.
@@ -71,11 +69,6 @@ BL_DEFINE_ENUM(BLFontFaceDiagFlags) {
   BL_FONT_FACE_DIAG_WRONG_NAME_DATA = 0x00000001u,
   //! Fixed data read from 'name' table and possibly fixed font family/subfamily name.
   BL_FONT_FACE_DIAG_FIXED_NAME_DATA = 0x00000002u,
-
-  //! Wrong data in 'kern' table [kerning disabled].
-  BL_FONT_FACE_DIAG_WRONG_KERN_DATA = 0x00000004u,
-  //! Fixed data read from 'kern' table so it can be used.
-  BL_FONT_FACE_DIAG_FIXED_KERN_DATA = 0x00000008u,
 
   //! Wrong data in 'cmap' table.
   BL_FONT_FACE_DIAG_WRONG_CMAP_DATA = 0x00000010u,
@@ -177,11 +170,7 @@ BL_API BLResult BL_CDECL bl_font_face_get_design_metrics(const BLFontFaceCore* s
 BL_API BLResult BL_CDECL bl_font_face_get_coverage_info(const BLFontFaceCore* self, BLFontCoverageInfo* out) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_face_get_panose_info(const BLFontFaceCore* self, BLFontPanoseInfo* out) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_face_get_character_coverage(const BLFontFaceCore* self, BLBitSetCore* out) BL_NOEXCEPT_C;
-BL_API bool BL_CDECL bl_font_face_has_script_tag(const BLFontFaceCore* self, BLTag script_tag) BL_NOEXCEPT_C;
-BL_API bool BL_CDECL bl_font_face_has_feature_tag(const BLFontFaceCore* self, BLTag feature_tag) BL_NOEXCEPT_C;
 BL_API bool BL_CDECL bl_font_face_has_variation_tag(const BLFontFaceCore* self, BLTag variation_tag) BL_NOEXCEPT_C;
-BL_API BLResult BL_CDECL bl_font_face_get_script_tags(const BLFontFaceCore* self, BLArrayCore* out) BL_NOEXCEPT_C;
-BL_API BLResult BL_CDECL bl_font_face_get_feature_tags(const BLFontFaceCore* self, BLArrayCore* out) BL_NOEXCEPT_C;
 BL_API BLResult BL_CDECL bl_font_face_get_variation_tags(const BLFontFaceCore* self, BLArrayCore* out) BL_NOEXCEPT_C;
 
 BL_END_C_DECLS
@@ -416,10 +405,6 @@ public:
   [[nodiscard]]
   BL_INLINE_NODEBUG bool has_vertical_metrics() const noexcept { return has_face_flag(BL_FONT_FACE_FLAG_VERTICAL_METRICS); }
 
-  //! Tests whether the font face has a legacy horizontal kerning feature ('kern' table with horizontal kerning data).
-  [[nodiscard]]
-  BL_INLINE_NODEBUG bool has_horizontal_kerning() const noexcept { return has_face_flag(BL_FONT_FACE_FLAG_HORIZONTAL_KERNING); }
-
   //! Tests whether the font face has a legacy vertical kerning feature ('kern' table with vertical kerning data).
   [[nodiscard]]
   BL_INLINE_NODEBUG bool has_vertical_kerning() const noexcept { return has_face_flag(BL_FONT_FACE_FLAG_VERTICAL_KERNING); }
@@ -512,30 +497,9 @@ public:
   //! Each unicode character is represented by a single bit in the given BitSet.
   BL_INLINE_NODEBUG BLResult get_character_coverage(BLBitSetCore* out) const noexcept { return bl_font_face_get_character_coverage(this, out); }
 
-  //! Tests whether the font face provides the given OpenType `script_tag`.
-  [[nodiscard]]
-  BL_INLINE_NODEBUG bool has_script_tag(BLTag script_tag) const noexcept { return bl_font_face_has_script_tag(this, script_tag); }
-
-  //! Tests whether the font face provides the given OpenType `feature_tag`.
-  [[nodiscard]]
-  BL_INLINE_NODEBUG bool has_feature_tag(BLTag feature_tag) const noexcept { return bl_font_face_has_feature_tag(this, feature_tag); }
-
   //! Tests whether the font face provides the given OpenType `variation_tag`.
   [[nodiscard]]
   BL_INLINE_NODEBUG bool has_variation_tag(BLTag variation_tag) const noexcept { return bl_font_face_has_variation_tag(this, variation_tag); }
-
-  //! Retrieves OpenType script tags provided by this \ref BLFontFace.
-  //!
-  //! Each script tag is represented by 4 characters encoded in \ref BLTag.
-  BL_INLINE_NODEBUG BLResult get_script_tags(BLArray<BLTag>* out) const noexcept { return bl_font_face_get_script_tags(this, out); }
-
-  //! Retrieves OpenType feature tags provided by this \ref BLFontFace.
-  //!
-  //! Each feature tag is represented by 4 characters encoded in \ref BLTag.
-  //!
-  //! Feature tag registry:
-  //!   - Microsoft <https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist>
-  BL_INLINE_NODEBUG BLResult get_feature_tags(BLArray<BLTag>* out) const noexcept { return bl_font_face_get_feature_tags(this, out); }
 
   //! Retrieves OpenType variation tags provided by this \ref BLFontFace.
   //!

@@ -276,12 +276,6 @@ set(BLEND2D_SRC_LIST
   blend2d/opentype/otglyfsimddata_p.h
   blend2d/opentype/otglyfsimddata.cpp
   blend2d/opentype/otglyfsimdimpl_p.h
-  blend2d/opentype/otkern.cpp
-  blend2d/opentype/otkern_p.h
-  blend2d/opentype/otlayout.cpp
-  blend2d/opentype/otlayout_p.h
-  blend2d/opentype/otlayoutcontext_p.h
-  blend2d/opentype/otlayouttables_p.h
   blend2d/opentype/otmetrics.cpp
   blend2d/opentype/otmetrics_p.h
   blend2d/opentype/otname.cpp

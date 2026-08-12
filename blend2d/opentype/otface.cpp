@@ -12,8 +12,6 @@
 #include <blend2d/opentype/otdefs_p.h>
 #include <blend2d/opentype/otface_p.h>
 #include <blend2d/opentype/otglyf_p.h>
-#include <blend2d/opentype/otkern_p.h>
-#include <blend2d/opentype/otlayout_p.h>
 #include <blend2d/opentype/otmetrics_p.h>
 #include <blend2d/opentype/otname_p.h>
 
@@ -62,15 +60,7 @@ static BLResult init_open_type_face(OTFaceImpl* ot_face_impl, const BLFontData* 
   }
 
   BL_PROPAGATE(MetricsImpl::init(ot_face_impl, tables));
-  BL_PROPAGATE(LayoutImpl::init(ot_face_impl, tables));
 
-  // Only setup legacy kerning if 'kern' feature is not provided by 'GPOS' table.
-  if (!bl_test_flag(ot_face_impl->ot_flags, OTFaceFlags::kGPosKernAvailable)) {
-    BL_PROPAGATE(KernImpl::init(ot_face_impl, tables));
-  }
-
-  BL_PROPAGATE(ot_face_impl->script_tag_set.finalize());
-  BL_PROPAGATE(ot_face_impl->feature_tag_set.finalize());
   BL_PROPAGATE(ot_face_impl->variation_tag_set.finalize());
 
   return BL_SUCCESS;
@@ -79,8 +69,6 @@ static BLResult init_open_type_face(OTFaceImpl* ot_face_impl, const BLFontData* 
 static BLResult BL_CDECL destroy_open_type_face(BLObjectImpl* impl) noexcept {
   OTFaceImpl* ot_face_impl = static_cast<OTFaceImpl*>(impl);
 
-  bl_call_dtor(ot_face_impl->kern);
-  bl_call_dtor(ot_face_impl->layout);
   bl_call_dtor(ot_face_impl->cff_fd_subr_indexes);
   bl_font_face_impl_dtor(ot_face_impl);
 
@@ -102,8 +90,6 @@ BLResult create_open_type_face(BLFontFaceCore* self, const BLFontData* font_data
   ot_face_impl->data.dcast() = *font_data;
   ot_face_impl->cmap_format = uint8_t(0xFF);
 
-  bl_call_ctor(ot_face_impl->kern);
-  bl_call_ctor(ot_face_impl->layout);
   bl_call_ctor(ot_face_impl->cff_fd_subr_indexes);
 
   BLResult result = init_open_type_face(ot_face_impl, font_data);

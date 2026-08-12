@@ -5,7 +5,6 @@
 
 #include <blend2d/core/api-build_p.h>
 #include <blend2d/core/array_p.h>
-#include <blend2d/core/bitarray_p.h>
 #include <blend2d/core/glyphbuffer_p.h>
 #include <blend2d/core/font_p.h>
 #include <blend2d/core/fontface_p.h>
@@ -17,8 +16,6 @@
 #include <blend2d/support/intops_p.h>
 #include <blend2d/support/ptrops_p.h>
 #include <blend2d/support/scopedbuffer_p.h>
-#include <blend2d/opentype/otface_p.h>
-#include <blend2d/opentype/otlayout_p.h>
 
 namespace bl {
 namespace FontInternal {
@@ -411,19 +408,9 @@ BL_API_IMPL BLResult bl_font_reset_variation_settings(BLFontCore* self) noexcept
 // ==================
 
 BL_API_IMPL BLResult bl_font_shape(const BLFontCore* self, BLGlyphBufferCore* gb) noexcept {
-  using namespace bl::FontInternal;
-  BL_ASSERT(self->_d.is_font());
+  bl_unused(self, gb);
 
-  BL_PROPAGATE(bl_font_map_text_to_glyphs(self, gb, nullptr));
-
-  bl::OpenType::OTFaceImpl* ot_face_impl = bl::FontFaceInternal::get_impl<bl::OpenType::OTFaceImpl>(&self->dcast().face());
-  if (ot_face_impl->layout.gsub().lookup_count) {
-    BLBitArray plan;
-    BL_PROPAGATE(bl::OpenType::LayoutImpl::calculate_gsub_plan(ot_face_impl, self->dcast().feature_settings(), &plan));
-    BL_PROPAGATE(bl_font_apply_gsub(self, gb, &plan));
-  }
-
-  return bl_font_position_glyphs(self, gb);
+  return bl_make_error(BL_ERROR_NOT_IMPLEMENTED);
 }
 
 BL_API_IMPL BLResult bl_font_map_text_to_glyphs(const BLFontCore* self, BLGlyphBufferCore* gb, BLGlyphMappingState* state_out) noexcept {
@@ -474,69 +461,7 @@ BL_API_IMPL BLResult bl_font_position_glyphs(const BLFontCore* self, BLGlyphBuff
     gb_impl->flags |= BL_GLYPH_BUFFER_GLYPH_ADVANCES;
   }
 
-  using OTFaceImpl = bl::OpenType::OTFaceImpl;
-  using OTFaceFlags = bl::OpenType::OTFaceFlags;
-
-  OTFaceImpl* otFaceI = bl::FontFaceInternal::get_impl<OTFaceImpl>(&self->dcast().face());
-
-  if (bl_test_flag(otFaceI->ot_flags, OTFaceFlags::kGPosLookupList)) {
-    BLBitArray plan;
-    BL_PROPAGATE(bl::OpenType::LayoutImpl::calculate_gpos_plan(otFaceI, self->dcast().feature_settings(), &plan));
-    BL_PROPAGATE(bl_font_apply_gpos(self, gb, &plan));
-  }
-
-  constexpr OTFaceFlags kKernFlags = OTFaceFlags::kGPosKernAvailable | OTFaceFlags::kLegacyKernAvailable;
-  if ((otFaceI->ot_flags & kKernFlags) == OTFaceFlags::kLegacyKernAvailable) {
-    if (self_impl->feature_settings.dcast().get_value(BL_MAKE_TAG('k', 'e', 'r', 'n')) != 0u) {
-      BL_PROPAGATE(face_impl->funcs.apply_kern(face_impl, gb_impl->content, gb_impl->placement_data, gb_impl->size));
-    }
-  }
-
   return BL_SUCCESS;
-}
-
-BL_API_IMPL BLResult bl_font_apply_kerning(const BLFontCore* self, BLGlyphBufferCore* gb) noexcept {
-  using namespace bl::FontInternal;
-  BL_ASSERT(self->_d.is_font());
-
-  BLFontPrivateImpl* self_impl = get_impl(self);
-  BLFontFacePrivateImpl* face_impl = bl::FontFaceInternal::get_impl(&self_impl->face);
-  BLGlyphBufferPrivateImpl* gb_impl = bl_glyph_buffer_get_impl(gb);
-
-  if (!gb_impl->size)
-    return BL_SUCCESS;
-
-  if (BL_UNLIKELY(!(gb_impl->placement_data)))
-    return bl_make_error(BL_ERROR_INVALID_STATE);
-
-  return face_impl->funcs.apply_kern(face_impl, gb_impl->content, gb_impl->placement_data, gb_impl->size);
-}
-
-BL_API_IMPL BLResult bl_font_apply_gsub(const BLFontCore* self, BLGlyphBufferCore* gb, const BLBitArrayCore* lookups) noexcept {
-  using namespace bl::FontInternal;
-  BL_ASSERT(self->_d.is_font());
-
-  BLFontPrivateImpl* self_impl = get_impl(self);
-  BLFontFacePrivateImpl* face_impl = bl::FontFaceInternal::get_impl(&self_impl->face);
-
-  return face_impl->funcs.apply_gsub(face_impl, static_cast<BLGlyphBuffer*>(gb), lookups->dcast().data(), lookups->dcast().word_count());
-}
-
-BL_API_IMPL BLResult bl_font_apply_gpos(const BLFontCore* self, BLGlyphBufferCore* gb, const BLBitArrayCore* lookups) noexcept {
-  using namespace bl::FontInternal;
-  BL_ASSERT(self->_d.is_font());
-
-  BLFontPrivateImpl* self_impl = get_impl(self);
-  BLFontFacePrivateImpl* face_impl = bl::FontFaceInternal::get_impl(&self_impl->face);
-  BLGlyphBufferPrivateImpl* gb_impl = bl_glyph_buffer_get_impl(gb);
-
-  if (!gb_impl->size)
-    return BL_SUCCESS;
-
-  if (BL_UNLIKELY(!(gb_impl->placement_data)))
-    return bl_make_error(BL_ERROR_INVALID_STATE);
-
-  return face_impl->funcs.apply_gpos(face_impl, static_cast<BLGlyphBuffer*>(gb), lookups->dcast().data(), lookups->dcast().word_count());
 }
 
 BL_API_IMPL BLResult bl_font_get_text_metrics(const BLFontCore* self, BLGlyphBufferCore* gb, BLTextMetrics* out) noexcept {
