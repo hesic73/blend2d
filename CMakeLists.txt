@@ -227,8 +227,6 @@ set(BLEND2D_SRC_LIST
   blend2d/codec/pngops_p.h
   blend2d/codec/pngopssimdimpl_p.h
   blend2d/codec/pngopssimdimpl_test.cpp
-  blend2d/codec/qoicodec.cpp
-  blend2d/codec/qoicodec_p.h
 
   blend2d/compression/checksum.cpp
   blend2d/compression/checksum_asimd.cpp

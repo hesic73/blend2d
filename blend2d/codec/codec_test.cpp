@@ -176,23 +176,6 @@ UNIT(image_codec_png, BL_TEST_GROUP_IMAGE_CODEC_ROUNDTRIP) {
   }
 }
 
-UNIT(image_codec_qoi, BL_TEST_GROUP_IMAGE_CODEC_ROUNDTRIP) {
-  static constexpr uint32_t kCmdCount = 10;
-  static constexpr uint32_t kTestCount = 100;
-
-  for (BLSizeI image_size : image_codec_test_sizes) {
-    BLImageCodec codec;
-    EXPECT_SUCCESS(codec.find_by_name("QOI"));
-
-    BLRandom rnd(0x123456789ABCDEFu);
-    TestOptions test_options{};
-
-    INFO("Testing QOI encoder & decoder with %dx%d images", image_size.w, image_size.h);
-    test_encoding_decoding_random_images(image_size, BL_FORMAT_XRGB32, codec, rnd, kTestCount, kCmdCount, test_options);
-    test_encoding_decoding_random_images(image_size, BL_FORMAT_PRGB32, codec, rnd, kTestCount, kCmdCount, test_options);
-  }
-}
-
 } // {bl::Codecs::Tests}
 
 #endif // BL_TEST

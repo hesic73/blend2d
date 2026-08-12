@@ -12,7 +12,6 @@
 #include <blend2d/codec/bmpcodec_p.h>
 #include <blend2d/codec/jpegcodec_p.h>
 #include <blend2d/codec/pngcodec_p.h>
-#include <blend2d/codec/qoicodec_p.h>
 #include <blend2d/support/stringops_p.h>
 #include <blend2d/support/wrap_p.h>
 #include <blend2d/threading/mutex_p.h>
@@ -344,9 +343,8 @@ void bl_register_built_in_codecs(BLRuntimeContext* rt) noexcept {
   using namespace bl::ImageCodecInternal;
 
   BLArray<BLImageCodec>* codecs = &builtin_codecs_array;
-  codecs->reserve(4);
+  codecs->reserve(3);
   bl::Bmp::bmp_codec_on_init(rt, codecs);
   bl::Jpeg::jpeg_codec_on_init(rt, codecs);
   bl::Png::png_codec_on_init(rt, codecs);
-  bl::Qoi::qoi_codec_on_init(rt, codecs);
 }
