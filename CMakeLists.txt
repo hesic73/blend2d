@@ -208,8 +208,6 @@ set(BLEND2D_SRC_LIST
   blend2d/core/var.h
   blend2d/core/var_p.h
 
-  blend2d/codec/bmpcodec.cpp
-  blend2d/codec/bmpcodec_p.h
   blend2d/codec/codec_test.cpp
   blend2d/codec/jpegcodec.cpp
   blend2d/codec/jpegcodec_p.h

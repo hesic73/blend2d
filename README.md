@@ -16,7 +16,7 @@ Project Organization
   * **`/`**                - Project root, contains this README.md, other markdown files, CMakeLists.txt, and scripts for developers
     * **src**              - Source code (always point include path in here)
       * **blend2d**        - Blend2D source code and headers, all core classes and public headers are here
-        * **codec**        - Image codecs and codec utilities (BMP, JPEG, and PNG)
+        * **codec**        - Image codecs and codec utilities (JPEG and PNG)
         * **compression**  - Implementation of compression and decompression algorithms (DEFLATE)
         * **opentype**     - TrueType and OpenType font support
         * **pipeline**     - 2D rendering pipeline definitions and implementations (reference and JIT)

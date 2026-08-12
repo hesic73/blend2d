@@ -138,23 +138,6 @@ static constexpr BLSizeI image_codec_test_sizes[] = {
   { 301, 301 }
 };
 
-UNIT(image_codec_bmp, BL_TEST_GROUP_IMAGE_CODEC_ROUNDTRIP) {
-  static constexpr uint32_t kCmdCount = 10;
-  static constexpr uint32_t kTestCount = 100;
-
-  for (BLSizeI image_size : image_codec_test_sizes) {
-    BLImageCodec codec;
-    EXPECT_SUCCESS(codec.find_by_name("BMP"));
-
-    BLRandom rnd(0x123456789ABCDEFu);
-    TestOptions test_options{};
-
-    INFO("Testing BMP encoder & decoder with %dx%d images", image_size.w, image_size.h);
-    test_encoding_decoding_random_images(image_size, BL_FORMAT_XRGB32, codec, rnd, kTestCount, kCmdCount, test_options);
-    test_encoding_decoding_random_images(image_size, BL_FORMAT_PRGB32, codec, rnd, kTestCount, kCmdCount, test_options);
-  }
-}
-
 UNIT(image_codec_png, BL_TEST_GROUP_IMAGE_CODEC_ROUNDTRIP) {
   static constexpr uint32_t kCmdCount = 10;
   static constexpr uint32_t kTestCount = 100;

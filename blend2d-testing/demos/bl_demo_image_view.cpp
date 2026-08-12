@@ -127,7 +127,7 @@ public:
 
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
     dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setNameFilter(QString("Image File (*.apng *.bmp *.jpeg *.jpg *.png)"));
+    dialog.setNameFilter(QString("Image File (*.apng *.jpeg *.jpg *.png)"));
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec() == QDialog::Accepted) {
