@@ -1689,7 +1689,7 @@ static BLResult BL_CDECL restore_impl(BLContextImpl* base_impl, const BLContextC
       on_after_flatten_tolerance_changed(ctx_impl);
       on_after_offset_parameter_changed(ctx_impl);
 
-      context_flags_to_keep &= ~ContextFlags::kSharedStateFill;
+      context_flags_to_keep &= ~(ContextFlags::kSharedStateFill | ContextFlags::kSharedStateStrokeBase);
     }
 
     if (!bl_test_flag(current_flags, ContextFlags::kWeakStateClip)) {
@@ -1891,21 +1891,24 @@ static BLResult BL_CDECL set_approximation_options_impl(BLContextImpl* base_impl
   uint32_t offset_mode = options->offset_mode;
 
   double flatten_tolerance = options->flatten_tolerance;
+  double simplify_tolerance = options->simplify_tolerance;
   double offset_parameter = options->offset_parameter;
 
   if (BL_UNLIKELY(flatten_mode > BL_FLATTEN_MODE_MAX_VALUE ||
                   offset_mode > BL_OFFSET_MODE_MAX_VALUE ||
                   Math::is_nan(flatten_tolerance) ||
+                  Math::is_nan(simplify_tolerance) ||
                   Math::is_nan(offset_parameter)))
     return bl_make_error(BL_ERROR_INVALID_VALUE);
 
   on_before_config_change(ctx_impl);
-  ctx_impl->context_flags &= ~(ContextFlags::kWeakStateConfig | ContextFlags::kSharedStateFill);
+  ctx_impl->context_flags &= ~(ContextFlags::kWeakStateConfig | ContextFlags::kSharedStateFill | ContextFlags::kSharedStateStrokeBase);
 
   BLApproximationOptions& dst = ctx_impl->internal_state.approximation_options;
   dst.flatten_mode = uint8_t(flatten_mode);
   dst.offset_mode = uint8_t(offset_mode);
   dst.flatten_tolerance = bl_clamp(flatten_tolerance, ContextInternal::kMinimumTolerance, ContextInternal::kMaximumTolerance);
+  dst.simplify_tolerance = bl_clamp(simplify_tolerance, ContextInternal::kMinimumTolerance, ContextInternal::kMaximumTolerance);
   dst.offset_parameter = offset_parameter;
 
   on_after_flatten_tolerance_changed(ctx_impl);
