@@ -1,0 +1,42 @@
+# Immutable source tarball for tags Plate can pin by URL_HASH.
+# git archive bytes, not GitHub's generated commit archives.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*-plate.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Archive and publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          archive="blend2d-${version}.tar.gz"
+          git archive --format=tar.gz --prefix="blend2d-${version}/" -o "${archive}" HEAD
+
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            if gh release view "${GITHUB_REF_NAME}" --json assets --jq '.assets[].name' | grep -Fxq "${archive}"; then
+              echo "Release ${GITHUB_REF_NAME} already has ${archive}; refusing to overwrite." >&2
+              exit 1
+            fi
+            gh release upload "${GITHUB_REF_NAME}" "${archive}"
+          else
+            gh release create "${GITHUB_REF_NAME}" "${archive}" \
+              --title "${GITHUB_REF_NAME}" \
+              --notes "Source tarball of ${GITHUB_REF_NAME}, produced with git archive."
+          fi

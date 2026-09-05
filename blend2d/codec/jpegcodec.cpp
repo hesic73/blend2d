@@ -711,6 +711,8 @@ static BLResult decoder_handle_restart(BLJpegDecoderImpl* decoder_impl, DecoderB
 
   // Skip the marker and flush entropy bits.
   reader.flush();
+  // refill() set end to the marker; restore the SOS bound before skipping it.
+  reader.end = pEnd;
   reader.advance(2);
   reader.done(stream);
 
