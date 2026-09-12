@@ -53,7 +53,7 @@ void BL_CDECL interpolate_prgb32_avx2(uint32_t* d_ptr, uint32_t d_size, const BL
       c_pix = srli_u16<8>(c_pix);
 
       Vec8xU16 cA = swizzle_u16<3, 3, 3, 3>(c_pix);
-      c_pix = div255_u16(c_pix | vec_cast<Vec8xU16>(argb64_a255) * cA);
+      c_pix = div255_u16((c_pix | vec_cast<Vec8xU16>(argb64_a255)) * cA);
       c_pix = packs_128_i16_u8(c_pix);
       storea_32(dSpanPtr, c_pix);
       dSpanPtr++;
