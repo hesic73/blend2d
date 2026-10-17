@@ -48,9 +48,6 @@ void BL_CDECL interpolate_prgb32(uint32_t* d_ptr, uint32_t d_size, const BLGradi
     dSpanPtr = d_ptr + (p0 >> 8);
     i = ((p1 >> 8) - (p0 >> 8));
 
-    if (i == 0)
-      c0 = c1;
-
     p0 = p1;
     i++;
 
@@ -189,9 +186,6 @@ void BL_CDECL interpolate_prgb64(uint64_t* d_ptr, uint32_t d_size, const BLGradi
 
     dSpanPtr = d_ptr + (p0 >> 8);
     i = ((p1 >> 8) - (p0 >> 8));
-
-    if (i == 0)
-      c0 = c1;
 
     p0 = p1;
     i++;
