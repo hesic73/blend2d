@@ -1799,7 +1799,7 @@ template<> BL_INLINE_NODEBUG uint8x8_t simd_loada_16<8>(const void* src) noexcep
 template<> BL_INLINE_NODEBUG uint8x8_t simd_loada_32<8>(const void* src) noexcept { return simd_u8(vld1_lane_u32(static_cast<const uint32_t*>(src), vdup_n_u32(0), 0)); }
 template<> BL_INLINE_NODEBUG uint8x8_t simd_loada_64<8>(const void* src) noexcept { return simd_u8(vld1_u64(static_cast<const uint64_t*>(src))); }
 
-template<> BL_INLINE_NODEBUG uint8x8_t simd_loadu_16<8>(const void* src) noexcept { return simd_u8(vset_lane_u16(bl::MemOps::readU16u(src), vdup_n_u16(0), 0)); }
+template<> BL_INLINE_NODEBUG uint8x8_t simd_loadu_16<8>(const void* src) noexcept { return simd_u8(vset_lane_u16(uint16_t(bl::MemOps::readU16u(src)), vdup_n_u16(0), 0)); }
 template<> BL_INLINE_NODEBUG uint8x8_t simd_loadu_32<8>(const void* src) noexcept { return simd_u8(vset_lane_u32(bl::MemOps::readU32u(src), vdup_n_u32(0), 0)); }
 template<> BL_INLINE_NODEBUG uint8x8_t simd_loadu_64<8>(const void* src) noexcept { return simd_u8(vld1_u8(static_cast<const uint8_t*>(src))); }
 
@@ -1811,7 +1811,7 @@ template<> BL_INLINE_NODEBUG uint8x16_t simd_loada_16<16>(const void* src) noexc
 template<> BL_INLINE_NODEBUG uint8x16_t simd_loada_32<16>(const void* src) noexcept { return simd_u8(vld1q_lane_u32(static_cast<const uint32_t*>(src), vdupq_n_u32(0), 0)); }
 template<> BL_INLINE_NODEBUG uint8x16_t simd_loada_64<16>(const void* src) noexcept { return simd_u8(vld1q_lane_u64(static_cast<const uint64_t*>(src), vdupq_n_u64(0), 0)); }
 
-template<> BL_INLINE_NODEBUG uint8x16_t simd_loadu_16<16>(const void* src) noexcept { return simd_u8(vsetq_lane_u16(bl::MemOps::readU16u(src), vdupq_n_u16(0), 0)); }
+template<> BL_INLINE_NODEBUG uint8x16_t simd_loadu_16<16>(const void* src) noexcept { return simd_u8(vsetq_lane_u16(uint16_t(bl::MemOps::readU16u(src)), vdupq_n_u16(0), 0)); }
 template<> BL_INLINE_NODEBUG uint8x16_t simd_loadu_32<16>(const void* src) noexcept { return simd_u8(vsetq_lane_u32(bl::MemOps::readU32u(src), vdupq_n_u32(0), 0)); }
 template<> BL_INLINE_NODEBUG uint8x16_t simd_loadu_64<16>(const void* src) noexcept { return simd_u8(vsetq_lane_u64(bl::MemOps::readU64u(src), vdupq_n_u64(0), 0)); }
 
